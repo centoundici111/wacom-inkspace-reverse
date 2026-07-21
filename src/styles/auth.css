@@ -1,0 +1,397 @@
+.sign-in-header {
+	color: #2d2d2d;
+	font-size: 28px;
+	font-weight: bold;
+	margin-top: 28px;
+}
+
+.sign-in-semi-bold {
+	color: #000000;
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.sign-in-account-label {
+	color: #000000;
+	font-size: 16px;
+	font-weight: normal;
+	margin: 16px 0px 50px 0px;
+}
+
+.sign-in-account-label-only-top-margin {
+	color: #000000;
+	font-size: 16px;
+	font-weight: normal;
+	margin: 16px 0px 0px 0px;
+}
+
+.sign-up-main-container {
+	margin: 0 10%;
+	width: 38%;
+}
+
+.sign-in-label {
+	color: #000000;
+	font-size: 14px;
+	font-weight: normal;
+}
+
+.sign-up-profile-receive-email-label {
+	color: #000000;
+	font-size: 14px;
+	font-weight: normal;
+	margin-top: 16px;
+}
+
+.sign-up-profile-verify-email-label {
+	color: #000000;
+	font-size: 14px;
+	font-weight: normal;
+	width: 38%;
+}
+
+.sign-in-settings-button {
+	margin-left: 32px;
+}
+
+.sign-in-password-strength-value {
+	color: #000000;
+	font-size: 14px;
+	color: #00a7db;
+	text-indent: 4px;
+	visibility: hidden;
+}
+
+.sign-in-password-requirement-label {
+	color: #000000;
+	font-size: 14px;
+	font-weight: normal;
+	width: 50%;
+	margin-top: 10px;
+	line-height: 24px;
+}
+
+.sign-in-password-strength-label {
+	color: #000000;
+	font-size: 14px;
+	font-weight: normal;
+	font-weight: bold;
+}
+
+.sign-in-email-text,
+.sign-in-password-text {
+	font-size: 12px;
+	color: #b7b7b7;
+	font-weight: normal;
+	margin-left: 1px;
+}
+
+.sign-up-profile-text {
+	font-size: 12px;
+	color: #b7b7b7;
+	font-weight: normal;
+}
+
+.sign-in-input,
+.sign-up-input {
+	width: 50%;
+	background: transparent;
+	border-bottom: 1px solid #b7b7b7;
+	border-radius: 0;
+	padding: 0;
+	margin-bottom: 38px;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+.sign-up-profile-input {
+	background: transparent;
+	border-bottom: 1px solid #b7b7b7;
+	border-left: 0px;
+	border-right: 0px;
+	border-top: 0px;
+	border-radius: 0;
+	padding: 0;
+	margin-bottom: 38px;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+.sign-up-profile-select-input {
+	background: transparent;
+	border-bottom: 1px solid #b7b7b7;
+	border-left: 0px;
+	border-right: 0px;
+	border-top: 0px;
+	border-radius: 0;
+	padding-bottom: 14px;
+	margin-bottom: 38px;
+	font-size: 16px;
+	font-weight: normal;
+	-webkit-appearance: none;
+	background: url("data:image/svg+xml;utf8,<svg viewBox='0 0 960 560' width='24' height='24' xmlns='http://www.w3.org/2000/svg'><g><path d='M480,344.181L268.869,131.889c-15.756-15.859-41.3-15.859-57.054,0c-15.754,15.857-15.754,41.57,0,57.431l237.632,238.937c8.395,8.451,19.562,12.254,30.553,11.698c10.993,0.556,22.159-3.247,30.555-11.698l237.631-238.937c15.756-15.86,15.756-41.571,0-57.431s-41.299-15.859-57.051,0L480,344.181z' fill='grey'/></g></svg>")
+		no-repeat;
+	background-position: right 0px top -4px;
+	outline: none;
+}
+
+.sign-in-close {
+	position: absolute;
+	top: -10px;
+	right: 30%;
+	width: 46px;
+	height: 46px;
+}
+
+.sign-in-submit-button {
+	background: #00b9f0;
+	color: white;
+	font-weight: 600;
+	font-size: 14px;
+	width: 146px;
+	line-height: 32px;
+	border: 0px;
+	height: 32px;
+	margin: 10px 0px 16px 0px;
+}
+
+.sign-in-continue-button {
+	background: #00b9f0;
+	color: white;
+	font-weight: 600;
+	font-size: 14px;
+	width: 112px;
+	line-height: 32px;
+	border: 0px;
+	height: 32px;
+	margin: 10px 0px 16px 0px;
+}
+
+.sign-in-white-button {
+	background: transparent;
+	color: #00b9f0;
+	font-weight: 600;
+	font-size: 14px;
+	width: 120px;
+	line-height: 32px;
+	border: 0px;
+	height: 32px;
+	padding: 0px;
+	margin: 8px 0px 0px 0px;
+}
+
+.sign-in-login-container {
+	width: 50%;
+	justify-content: space-between;
+}
+
+input[type="checkbox"] {
+	position: absolute;
+	opacity: 0;
+	z-index: -9999;
+}
+input[type="checkbox"] + label {
+	position: relative;
+	padding-left: 34px;
+}
+input[type="checkbox"] + label .indicator {
+	position: absolute;
+	left: -4px;
+	display: block;
+	width: 24px;
+	height: 24px;
+	background: #fff;
+	border-radius: 3px;
+	border: 1px solid #00b9f0;
+	cursor: pointer;
+	transition: box-shadow 200ms, border 200ms, background 200ms;
+}
+
+input[type="checkbox"] + label .indicator:hover {
+	background: #fff;
+}
+
+/* input[type="checkbox"]:focus + label .indicator {
+	box-shadow: 0px 0px 1px 3px #00b9f0;
+  } */
+
+input[type="checkbox"]:checked + label .indicator {
+	background: #00b9f0;
+}
+
+input[type="checkbox"]:checked + label .indicator::after {
+	content: "";
+	position: absolute;
+	width: 10px;
+	height: 16px;
+	border: 2px solid #fff;
+	border-left: none;
+	border-top: none;
+	transform: rotate(45deg);
+	left: 6px;
+}
+
+/** Background variations **/
+input.blue[type="checkbox"]:checked + label .indicator {
+	background: #00b9f0;
+}
+
+.dialog-content.auth-content {
+	padding: 25px 0px 25px 50px;
+	width: 450px;
+	min-width: 450px;
+}
+
+.auth-content .sign-in-close {
+	position: absolute;
+	top: 10px;
+	right: 15px;
+	width: 46px;
+	height: 46px;
+}
+
+.auth-content .sign-in-input {
+	width: 86%;
+	background: transparent;
+	border-bottom: 1px solid #b7b7b7;
+	border-radius: 0;
+	padding: 0;
+	margin-bottom: 38px;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+.sign-up-input-email,
+.sign-up-input-repeat-password {
+	width: 50%;
+	background: transparent;
+	border-bottom: 1px solid #b7b7b7;
+	border-radius: 0;
+	padding: 0;
+	margin-bottom: 5px;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+.sign-up-input-password {
+	width: 50%;
+	background: transparent;
+	border-bottom: 1px solid #b7b7b7;
+	border-radius: 0;
+	padding: 0;
+	margin-bottom: 38px;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+.auth-content .sign-up-input-password {
+	width: 78%;
+	background: transparent;
+	border-bottom: 1px solid #b7b7b7;
+	border-radius: 0;
+	padding: 0;
+	margin-bottom: 38px;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+.auth-content .sign-up-input-email,
+.auth-content .sign-up-input-repeat-password {
+	width: 78%;
+	background: transparent;
+	border-bottom: 1px solid #b7b7b7;
+	border-radius: 0;
+	padding: 0;
+	margin-bottom: 5px;
+	font-size: 16px;
+	font-weight: normal;
+}
+
+.auth-content .sign-in-white-button {
+	background: transparent;
+	color: #00b9f0;
+	font-weight: 600;
+	font-size: 14px;
+	width: 120px;
+	line-height: 32px;
+	border: 0px;
+	height: 32px;
+	padding: 0px;
+	white-space: nowrap;
+	margin: 8px 0px 0px 134px;
+}
+
+.SignUp .auth-content .sign-in-white-button {
+	background: transparent;
+	color: #00b9f0;
+	font-weight: 600;
+	font-size: 14px;
+	width: 120px;
+	line-height: 32px;
+	border: 0px;
+	height: 32px;
+	padding: 0px;
+	white-space: nowrap;
+	margin: 8px 0px 0px 120px;
+}
+
+.auth-content .sign-in-password-requirement-label {
+	color: #000000;
+	font-size: 14px;
+	font-weight: normal;
+	width: 80%;
+	margin-top: 10px;
+	line-height: 24px;
+}
+
+.auth-content .sign-up-main-container {
+	width: 87%;
+	margin: 0px;
+}
+
+.auth-content .sign-up-profile-verify-email-label {
+	color: #000000;
+	font-size: 14px;
+	font-weight: normal;
+	width: 87%;
+}
+
+.auth-content .sign-up-profile-receive-email-label {
+	color: #000000;
+	font-size: 14px;
+	font-weight: normal;
+	margin-top: 16px;
+	margin-right: 22px;
+}
+
+.auth-error-text {
+	font-size: 12px;
+	color: #ff567e;
+	font-weight: normal;
+	margin-left: 1px;
+	margin-bottom: 16px;
+	visibility: hidden;
+}
+
+.auth-error-text.visible,
+.sign-in-password-strength-value.visible {
+	visibility: visible;
+}
+
+.auth-label-error,
+.auth-label-weak {
+	color: #ff567e;
+}
+
+.auth-label-strong {
+	color: #00a7db;
+}
+
+.sign-in-input.auth-input-error,
+.sign-up-input.auth-input-error,
+.sign-up-input-email.auth-input-error,
+.sign-up-input-password.auth-input-error,
+.sign-up-input-repeat-password.auth-input-error {
+	color: #ff567e;
+	border-bottom: 1px solid #ff567e;
+}

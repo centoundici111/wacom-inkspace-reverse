@@ -1,0 +1,35 @@
+.menu ul {
+	list-style-type: none;
+	padding: 0;
+	margin: 16px 0;
+}
+.menu ul li {
+	display: inline-block;
+	width: 34px;
+	height: 34px;
+	margin-left: 5px;
+}
+
+.menu.center {
+	display: inline-block;
+	margin-right: 90px;
+}
+
+.menu.center.live-mode {
+	display: inline-block;
+	margin-right: 144px;
+}
+
+.menu.center ul li {
+	margin-left: 14px;
+}
+
+.menu.pull-left ul {
+	margin-left: 72px;
+	margin-right: 20px;
+}
+
+.menu.pull-right ul {
+	margin-right: 72px;
+	margin-left: 20px;
+}

@@ -1,0 +1,30 @@
+{
+	"compilerOptions": {
+		"allowJs": true,
+		"checkJs": false,
+		"baseUrl": ".",
+		"module": "esnext",
+		"moduleResolution": "node",
+		"target": "es2020",
+		"jsx": "react",
+		"resolveJsonModule": true,
+		"paths": {
+			"*": [
+				"src/*",
+				"scripts/*",
+				"*"
+			]
+		}
+	},
+	"include": [
+		"src/**/*.js",
+		"scripts/**/*.js",
+		"*.js",
+		"package.json",
+		"project.config.js"
+	],
+	"exclude": [
+		"dist",
+		"node_modules"
+	]
+}

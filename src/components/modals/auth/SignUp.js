@@ -1,0 +1,100 @@
+import React, { Component } from "react";
+import { FormattedMessage, injectIntl } from "react-intl";
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
+import * as actions from "../../../actions/modals";
+import images from "../../../images";
+import Button from "../../generic/Button";
+import SignUpForm from "../../helpers/SignUpForm";
+
+class SignUp extends Component {
+	constructor(props) {
+		super(props);
+	}
+
+	componentDidMount() {
+		this.props.checkForInternet(
+			this.props.config.context,
+			this.props.config.authContext
+		);
+	}
+
+	render() {
+		return (
+			<>
+				<Button
+					key={this.props.config.type + 2}
+					{...this.props.config.buttons[2]}
+				></Button>
+				<img className="sign-in-logo" src={images.wacomLogo} alt="" />
+				<label className="sign-in-header">
+					<FormattedMessage id="auth.sign.up.wacom.id" />
+				</label>
+				<label className="sign-in-account-label">
+					<FormattedMessage id="auth.sign.up.all.things.wacom" />
+				</label>
+				<SignUpForm config={this.props.config}></SignUpForm>
+				<div className="flex-column">
+					<div className="flex-row">
+						<label className="sign-in-password-strength-label">
+							{this.props.hasEmptyPassword ? (
+								<FormattedMessage id="auth.sign.up.choose.strong.password" />
+							) : (
+								<FormattedMessage id="auth.sign.up.password.strength" />
+							)}
+						</label>
+						<label
+							className={`sign-in-password-strength-value ${
+								this.props.hasValidPassword
+									? "auth-label-strong"
+									: "auth-label-weak"
+							} ${this.props.hasEmptyPassword ? "" : "visible"}`}
+						>
+							{!this.props.hasEmptyPassword &&
+							this.props.hasValidPassword ? (
+								<FormattedMessage id="auth.sign.up.strong" />
+							) : (
+								<FormattedMessage id="auth.sign.up.weak" />
+							)}
+						</label>
+					</div>
+					<div className="flex-row">
+						<label className="sign-in-password-requirement-label">
+							<FormattedMessage id="auth.sign.up.password.description" />
+						</label>
+					</div>
+				</div>
+				<Button
+					key={this.props.config.type + 0}
+					{...this.props.config.buttons[0]}
+					clicked={this.props.continueButtonDisabled}
+				></Button>
+				<div className="flex-row">
+					<label className="sign-in-account-label-only-top-margin">
+						<FormattedMessage id="auth.sign.up.already.have.account" />
+					</label>
+					<Button
+						key={this.props.config.type + 1}
+						{...this.props.config.buttons[1]}
+					/>
+				</div>
+			</>
+		);
+	}
+}
+
+function mapStateToProps(state) {
+	return {
+		continueButtonDisabled: state.AuthReducer.continueButtonDisabled,
+		hasValidPassword: state.AuthReducer.hasValidPassword,
+		hasEmptyPassword: state.AuthReducer.hasEmptyPassword,
+	};
+}
+
+function mapDispatchToProps(dispatch) {
+	return bindActionCreators(actions, dispatch);
+}
+
+export default connect(mapStateToProps, mapDispatchToProps, undefined, {
+	forwardRef: true,
+})(injectIntl(SignUp, { forwardRef: true }));

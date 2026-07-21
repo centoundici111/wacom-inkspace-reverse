@@ -1,0 +1,69 @@
+.no-internet-connection-container {
+	width: 100%;
+	height: 100%;
+	justify-content: center;
+	display: flex;
+	flex-direction: column;
+}
+
+.no-internet-connection-title {
+	color: #1b1b1b;
+	font-size: 16px;
+	font-weight: 500;
+	width: 50%;
+	text-align: center;
+}
+
+.no-internet-connection-content {
+	color: #969696;
+	font-size: 14px;
+	line-height: 3;
+	margin-bottom: 16px;
+	width: 50%;
+	text-align: center;
+}
+
+.no-internet-connection-buttons-container {
+	width: 50%;
+	justify-content: inherit;
+}
+
+.no-internet-connection-button-retry {
+	margin-right: 10px;
+	height: 32px;
+	line-height: 32px;
+	width: 110px;
+}
+
+.no-internet-connection-button-cancel {
+	margin-left: 10px;
+	height: 32px;
+	line-height: 32px;
+	width: 110px;
+}
+
+.NoInternetConnectionSignIn .dialog-content.auth-content,
+.NoInternetConnectionSignUp .dialog-content.auth-content {
+	padding: 20px;
+}
+
+.NoInternetConnectionSignIn
+	.dialog-content.auth-content
+	.no-internet-connection-title,
+.NoInternetConnectionSignIn
+	.dialog-content.auth-content
+	.no-internet-connection-content,
+.NoInternetConnectionSignIn
+	.dialog-content.auth-content
+	.no-internet-connection-buttons-container,
+.NoInternetConnectionSignUp
+	.dialog-content.auth-content
+	.no-internet-connection-title,
+.NoInternetConnectionSignUp
+	.dialog-content.auth-content
+	.no-internet-connection-content,
+.NoInternetConnectionSignUp
+	.dialog-content.auth-content
+	.no-internet-connection-buttons-container {
+	width: 100%;
+}
