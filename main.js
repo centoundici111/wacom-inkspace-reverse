@@ -37,6 +37,8 @@ global.mainWindow = null;
 
 let powerSaverID = null;
 let mainWindowSize = null;
+let devReloadWatcher = null;
+let devReloadTimer = null;
 
 crashReporter.start({
 	productName: "InkspaceDesktop",
@@ -218,6 +220,38 @@ function installExtensions() {
 	}
 }
 
+function watchDevRenderer() {
+	if (process.env.NODE_ENV !== "development" || devReloadWatcher) return;
+
+	const reloadWindow = () => {
+		if (!mainWindow || mainWindow.isDestroyed()) return;
+
+		clearTimeout(devReloadTimer);
+		devReloadTimer = setTimeout(() => {
+			if (mainWindow && !mainWindow.isDestroyed())
+				mainWindow.webContents.reloadIgnoringCache();
+		}, 150);
+	};
+
+	try {
+		devReloadWatcher = fs.watch(
+			__dirname,
+			{ recursive: true },
+			(eventType, filename) => {
+				if (!filename) return;
+
+				const normalizedFilename = filename.replace(/\\/g, "/");
+				const isRendererAsset = normalizedFilename.startsWith("dist/");
+				const isIndexFile = normalizedFilename === "index.html";
+
+				if (isRendererAsset || isIndexFile) reloadWindow();
+			}
+		);
+	} catch (error) {
+		console.warn("[DEV] renderer reload watcher unavailable", error);
+	}
+}
+
 function createWindow() {
 	console.info("[START] createWindow");
 
@@ -233,7 +267,7 @@ function createWindow() {
 			enableRemoteModule: true,
 			nodeIntegration: true,
 			contextIsolation: false,
-			devTools: project.debug,
+			devTools: debug,
 			defaultFontFamily: {
 				standard:
 					process.platform == "win32" ? "Segoe UI" : "Helvetica Neue",
@@ -243,6 +277,8 @@ function createWindow() {
 
 	mainWindow = new BrowserWindow(windowOptions);
 	console.info("[START] BrowserWindow created");
+
+	watchDevRenderer();
 
 	mainWindow.loadURL(path.join("file://", __dirname, "/index.html"));
 	console.info("[START] loading index.html");
@@ -289,6 +325,14 @@ function createWindow() {
 	});
 
 	mainWindow.on("closed", function () {
+		if (devReloadWatcher) {
+			devReloadWatcher.close();
+			devReloadWatcher = null;
+		}
+
+		clearTimeout(devReloadTimer);
+		devReloadTimer = null;
+
 		if (debug) console.info("[STOP] power-saver-id:", powerSaverID);
 		powerSaveBlocker.stop(powerSaverID);
 

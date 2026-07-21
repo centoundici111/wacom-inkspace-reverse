@@ -47,18 +47,14 @@ function confirmLogout() {
 
 function triggerLogin() {
 	return (dispatch, getState) => {
+		console.log("triggerLogin");
 		let { online } = getState().AppReducer;
-
+		console.log("online", online);
 		if (online) {
 			let { email, password } = getState().AuthReducer;
-
-			dispatch({
-				type: ActionTypes.AUTH_SIGN_IN,
-				body: { loginButtonDisabled: true },
-			});
-
 			AuthenticationManager.login(email, password).then(
 				(responseStatus) => {
+					console.log("responseStatus", responseStatus);
 					if (responseStatus === 200) {
 						dispatch(closeDialog());
 					} else if (responseStatus === 401) {

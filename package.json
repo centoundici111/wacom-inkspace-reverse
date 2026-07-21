@@ -14,7 +14,7 @@
 		"release": "node exec.js release",
 		"build": "cross-env NODE_ENV=production webpack --progress --profile",
 		"build-dev": "cross-env NODE_ENV=development webpack --progress --profile",
-		"dev": "concurrently --kill-others --success first \"cross-env NODE_ENV=development webpack --watch\" \"node ./app-scripts/sleep.js 28 && npm start\"",
+		"dev": "concurrently --kill-others --success first \"cross-env NODE_ENV=development webpack --watch\" \"node ./app-scripts/sleep.js 28 && cross-env NODE_ENV=development electron .\"",
 		"debug": "concurrently --kill-others --success first \"cross-env NODE_ENV=development webpack --watch\" \"node ./app-scripts/sleep.js 19 && npm run start-debug\"",
 		"start:dist": "NODE_ENV=production npx -y -p electron@12.0.2 -c 'electron .'",
 		"start": "cross-env NODE_ENV=production electron .",

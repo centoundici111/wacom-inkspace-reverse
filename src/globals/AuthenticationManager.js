@@ -198,7 +198,6 @@ let AuthenticationManager = {
 			email: email,
 			password: password,
 		};
-
 		let callback = () => this.syncWithCloud();
 		let responseStatus;
 
@@ -239,7 +238,7 @@ let AuthenticationManager = {
 				return responseStatus;
 			})
 			.catch((error) => {
-				console.warn(error);
+				console.error(error);
 
 				if (!navigator.onLine) {
 					global.updateState({ online: false });
@@ -253,6 +252,8 @@ let AuthenticationManager = {
 						AuthenticationManager.CONNECTIVITY_CHECK_REFRESH_RATE
 					);
 				}
+
+				return responseStatus || 0;
 			});
 	},
 
@@ -455,7 +456,8 @@ let AuthenticationManager = {
 	processAccessToken(token, oldToken, refreshToken, callback) {
 		let profile = {};
 		let payload = JWT.decodeToken(token).payload;
-		let oldTokenPayload = JWT.decodeToken(oldToken).payload;
+		let accessToken = oldToken || token;
+		let accessTokenPayload = JWT.decodeToken(accessToken).payload;
 		let lastLogin = Date.now();
 
 		profile.uuid = payload.sub;
@@ -464,7 +466,7 @@ let AuthenticationManager = {
 		profile.email = payload.profile.email;
 		profile.access = {
 			token: token,
-			expiration: oldTokenPayload.exp * 1000,
+			expiration: accessTokenPayload.exp * 1000,
 			refreshExpiration: payload.exp * 1000,
 			refreshToken: refreshToken,
 			rights: payload.rights,

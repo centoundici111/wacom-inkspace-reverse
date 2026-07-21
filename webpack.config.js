@@ -32,7 +32,8 @@ const config = {
 			"path": require.resolve('path-browserify'),
 			"crypto": require.resolve('crypto-browserify'),
 			"stream": require.resolve('stream-browserify'),
-			"querystring": require.resolve('querystring-es3')
+			"querystring": require.resolve('querystring-es3'),
+			"process": require.resolve('process/browser.js')
 		},
 		extensions: [".js", ".jsx", ".json"]
 	},
@@ -112,7 +113,7 @@ const config = {
 	plugins: [
 		new CleanWebpackPlugin(),
 		new MiniCssExtractPlugin({filename: "bundle.css"}),
-		new webpack.IgnorePlugin(new RegExp("^(ipc)$")),
+		new webpack.IgnorePlugin({ resourceRegExp: /^(ipc)$/ }),
 		new webpack.DefinePlugin(Object.assign({
 			"process.env": { NODE_ENV: JSON.stringify(project.env) },
 			__DEV__,
@@ -122,7 +123,7 @@ const config = {
 			Buffer: ['buffer', 'Buffer'],
 		}),
 		new webpack.ProvidePlugin({
-			process: 'process/browser',
+			process: 'process/browser.js',
 		}),
 	],
 	optimization: {
@@ -144,7 +145,7 @@ const config = {
 
 if (project.target == "ELECTRON") {
 	config.entry.main = inProjectSrc("index");
-	// config.target = "electron-renderer";
+	config.target = "electron-renderer";
 	config.externalsPresets = { electronRenderer: true, node: true };
 	config.node = {
 		__dirname: false,
