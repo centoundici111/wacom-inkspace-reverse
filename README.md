@@ -21,18 +21,11 @@ npm install --global --production windows-build-tools
 
 **First**, create SSH key on development computer and link it to your profile at Bitbucket. Follow this guide - [https://support.atlassian.com/bitbucket-cloud/docs/set-up-an-ssh-key/](https://support.atlassian.com/bitbucket-cloud/docs/set-up-an-ssh-key/)
 
-**Second**, clone these repositories in the same root folder via git and build headless-gl project manually:
+**Second**, clone this repository:
 
 ```bash
 $ git clone https://bitbucket.org/wacompa/mate-desktop
 ```
-```bash
-$ git clone https://github.com/stackgl/headless-gl
-```
-
-> **Important!** For headless-gl project, replace in binding.gyp file 'c++11' to 'c++17'
-
-To build headless-gl project, follow the instructions - [https://github.com/stackgl/headless-gl#how-should-i-set-up-a-development-environment-for-headless-gl](https://github.com/stackgl/headless-gl#how-should-i-set-up-a-development-environment-for-headless-gl)
 
 **Third**, navigate to project's root folder and install dependencies
 
@@ -40,17 +33,20 @@ To build headless-gl project, follow the instructions - [https://github.com/stac
 $ npm install
 ```
 
-**Fourth**, right after `npm install` or whenever you install a new npm package, run electron-rebuild command:
+This project now consumes the published `gl` package from npm instead of requiring a sibling `headless-gl` checkout.
+If `gl` cannot use a prebuilt binary for your environment, npm will fall back to building it locally during install.
+
+**Fourth**, after `npm install` the repo automatically runs Electron rebuild when native dependencies are installed.
+
+If you need to run it manually, use:
 
 ```sh
-$(npm bin)/electron-rebuild
+npm run electron-rebuild
 ```
 
-or if you're on Windows:
+This wrapper uses the local `electron-rebuild` package and adds a temporary `python -> python3` shim when needed for `gl`/ANGLE rebuilds on macOS or Linux.
 
-```sh
-.\node_modules\.bin\electron-rebuild.cmd
-```
+If you need to skip the automatic rebuild for troubleshooting, use `SKIP_ELECTRON_REBUILD=1 npm install`.
 
 **Finally**, run the app
 
