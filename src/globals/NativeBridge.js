@@ -108,18 +108,7 @@ let UIManager = {
 	},
 
 	openDialog: function (url) {
-		let win = new remote.BrowserWindow({
-			parent: remote.getCurrentWindow(),
-			modal: true,
-			minimizable: false,
-			maximizable: false,
-			show: false,
-			minWidth: 800,
-			minHeight: 600,
-			enableRemoteModule: true,
-		});
-		win.setMenuBarVisibility(false);
-		win.loadURL(url);
+		getPreloadAPI().openDialogWindow(url);
 	},
 };
 

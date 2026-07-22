@@ -111,6 +111,29 @@ ipcMain.handle("preload:quit-app", () => {
 	app.quit();
 });
 
+ipcMain.on("preload:open-dialog-window", (event, url) => {
+	const parentWindow = BrowserWindow.fromWebContents(event.sender) || mainWindow;
+	const dialogWindow = new BrowserWindow({
+		parent: parentWindow,
+		modal: true,
+		minimizable: false,
+		maximizable: false,
+		show: false,
+		minWidth: 800,
+		minHeight: 600,
+		webPreferences: {
+			enableRemoteModule: true,
+			nodeIntegration: true,
+			contextIsolation: false,
+			devTools: debug,
+		},
+	});
+
+	dialogWindow.setMenuBarVisibility(false);
+	dialogWindow.loadURL(url);
+	event.returnValue = true;
+});
+
 ipcMain.on("preload:block-sleep", (event) => {
 	const senderID = event.sender.id;
 	let blockerID = rendererPowerBlockers.get(senderID);

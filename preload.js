@@ -12,6 +12,10 @@ function sendWindowRequest(channel, payload) {
 	return ipcRenderer.sendSync(channel, payload);
 }
 
+function sendRequest(channel, payload) {
+	ipcRenderer.send(channel, payload);
+}
+
 window.__INKSPACE_PRELOAD__ = Object.freeze({
 	getDownloadsPath() {
 		return sendPathRequest("downloads");
@@ -59,6 +63,10 @@ window.__INKSPACE_PRELOAD__ = Object.freeze({
 
 	quitApp() {
 		return ipcRenderer.invoke("preload:quit-app");
+	},
+
+	openDialogWindow(url) {
+		sendRequest("preload:open-dialog-window", url);
 	},
 
 	blockSleep() {
