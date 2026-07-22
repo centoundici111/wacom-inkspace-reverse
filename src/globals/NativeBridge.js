@@ -16,62 +16,29 @@ function getPreloadAPI() {
 // AuthenticationManager.DEBUG
 let pcIsAwake = true;
 
-remote.powerMonitor.on("suspend", () => {
-	if (debug) console.info("The system is going to sleep");
-	pcIsAwake = false;
-});
-
-remote.powerMonitor.on("resume", () => {
-	if (debug) console.info("The system resume");
-	pcIsAwake = true;
-});
-
-remote.powerMonitor.on("lock-screen", () => {
-	if (debug) {
-		let d = new Date();
-		console.info(
-			"The system lock screen in",
-			d.getHours().pad(2) +
-				":" +
-				d.getMinutes().pad(2) +
-				":" +
-				d.getSeconds().pad(2)
-		);
+getPreloadAPI().onPowerEvent((message) => {
+	if (message.type == "suspend") {
+		if (debug) console.info("The system is going to sleep");
+		pcIsAwake = false;
+	} else if (message.type == "resume") {
+		if (debug) console.info("The system resume");
+		pcIsAwake = true;
+	} else if (message.type == "lock-screen" || message.type == "unlock-screen") {
+		if (debug) {
+			let d = new Date();
+			console.info(
+				message.type == "lock-screen"
+					? "The system lock screen in"
+					: "The system unlock screen in",
+				d.getHours().pad(2) +
+					":" +
+					d.getMinutes().pad(2) +
+					":" +
+					d.getSeconds().pad(2)
+			);
+		}
 	}
 });
-
-remote.powerMonitor.on("unlock-screen", () => {
-	if (debug) {
-		let d = new Date();
-		console.info(
-			"The system unlock screen in",
-			d.getHours().pad(2) +
-				":" +
-				d.getMinutes().pad(2) +
-				":" +
-				d.getSeconds().pad(2)
-		);
-	}
-
-	remote.powerMonitor.getSystemIdleState(60);
-	remote.powerMonitor.getSystemIdleTime();
-});
-
-remote.getCurrentWindow().on(
-	"minimize",
-	function (e) {
-		console.log("========= window is minimized");
-	},
-	false
-);
-
-remote.getCurrentWindow().on(
-	"restore",
-	function (e) {
-		console.log("========= window is restored");
-	},
-	false
-);
 
 // crashReporter.start({
 // 	productName: "InkspaceDesktop",
@@ -85,11 +52,7 @@ remote.getCurrentWindow().on(
 
 let UIManager = {
 	editWindow: function (props) {
-		let win = remote.getCurrentWindow();
-
-		if ("resizable" in props) win.setResizable(props.resizable);
-		if ("maximizable" in props) win.setMaximizable(props.maximizable);
-		if ("size" in props) win.setSize(props.size.width, props.size.height);
+		getPreloadAPI().editWindow(props);
 	},
 
 	setVisualZoomLevelLimits: function (min, max) {
@@ -97,18 +60,18 @@ let UIManager = {
 	},
 
 	maximize: function () {
-		remote.getCurrentWindow().maximize();
+		getPreloadAPI().maximizeWindow().catch(console.error);
 	},
 
 	reload: function () {
-		remote.getCurrentWindow().reload();
+		getPreloadAPI().reloadWindow().catch(console.error);
 	},
 
 	updateAppContext(context) {},
 	setCloudLocale(locale) {},
 
 	quit: function () {
-		remote.app.quit();
+		getPreloadAPI().quitApp().catch(console.error);
 	},
 
 	showSaveDialog: function (title, fileName, callback) {
@@ -193,23 +156,22 @@ let IOManager = {
 
 let PowerManager = {
 	blockSleep: function () {
-		if (!this.blockerID)
-			this.blockerID = remote.powerSaveBlocker.start(
-				"prevent-display-sleep"
-			);
+		if (!this.blockerID) this.blockerID = getPreloadAPI().blockSleep();
 
 		return this.blockerID;
 	},
 
 	unblockSleep: function () {
 		if (this.blockerID) {
-			remote.powerSaveBlocker.stop(this.blockerID);
+			getPreloadAPI().unblockSleep(this.blockerID);
 			delete this.blockerID;
 		}
 	},
 
 	onSuspend: function (callback) {
-		remote.powerMonitor.on("suspend", callback);
+		getPreloadAPI().onPowerEvent((message) => {
+			if (message.type == "suspend") callback();
+		});
 	},
 };
 
@@ -218,6 +180,11 @@ let NativeLinker = {
 	linkBrowserWindow: function () {
 		ipcRenderer.send("browser-window");
 		ipcRenderer.on("browser-window", (event, message) => {
+			if (message.type == "minimize")
+				console.log("========= window is minimized");
+			else if (message.type == "restore")
+				console.log("========= window is restored");
+
 			window.minimized = message.type == "minimize";
 		});
 	},

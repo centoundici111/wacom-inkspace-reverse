@@ -9,6 +9,7 @@ const {
 	ipcMain,
 	BrowserWindow,
 	Menu,
+	powerMonitor,
 	powerSaveBlocker,
 	Tray,
 	nativeImage,
@@ -39,6 +40,13 @@ let powerSaverID = null;
 let mainWindowSize = null;
 let devReloadWatcher = null;
 let devReloadTimer = null;
+const rendererPowerBlockers = new Map();
+
+function sendToMainWindow(channel, message) {
+	if (!mainWindow || mainWindow.isDestroyed()) return;
+
+	mainWindow.webContents.send(channel, message);
+}
 
 ipcMain.on("preload:get-app-path", (event, pathName) => {
 	event.returnValue = app.getPath(pathName);
@@ -76,6 +84,64 @@ ipcMain.handle("preload:show-open-dialog", async (event, options) => {
 
 	return result.filePaths;
 });
+
+ipcMain.on("preload:update-window", (event, props) => {
+	const window = BrowserWindow.fromWebContents(event.sender) || mainWindow;
+
+	if (window && props) {
+		if ("resizable" in props) window.setResizable(props.resizable);
+		if ("maximizable" in props) window.setMaximizable(props.maximizable);
+		if ("size" in props) window.setSize(props.size.width, props.size.height);
+	}
+
+	event.returnValue = true;
+});
+
+ipcMain.handle("preload:maximize-window", (event) => {
+	const window = BrowserWindow.fromWebContents(event.sender) || mainWindow;
+	if (window) window.maximize();
+});
+
+ipcMain.handle("preload:reload-window", (event) => {
+	const window = BrowserWindow.fromWebContents(event.sender) || mainWindow;
+	if (window) window.reload();
+});
+
+ipcMain.handle("preload:quit-app", () => {
+	app.quit();
+});
+
+ipcMain.on("preload:block-sleep", (event) => {
+	const senderID = event.sender.id;
+	let blockerID = rendererPowerBlockers.get(senderID);
+
+	if (!blockerID) {
+		blockerID = powerSaveBlocker.start("prevent-display-sleep");
+		rendererPowerBlockers.set(senderID, blockerID);
+	}
+
+	event.returnValue = blockerID;
+});
+
+ipcMain.on("preload:unblock-sleep", (event, blockerID) => {
+	const senderID = event.sender.id;
+	const activeBlockerID = blockerID || rendererPowerBlockers.get(senderID);
+
+	if (activeBlockerID && powerSaveBlocker.isStarted(activeBlockerID))
+		powerSaveBlocker.stop(activeBlockerID);
+
+	rendererPowerBlockers.delete(senderID);
+	event.returnValue = true;
+});
+
+powerMonitor.on("suspend", () => sendToMainWindow("preload:power-event", { type: "suspend" }));
+powerMonitor.on("resume", () => sendToMainWindow("preload:power-event", { type: "resume" }));
+powerMonitor.on("lock-screen", () =>
+	sendToMainWindow("preload:power-event", { type: "lock-screen" })
+);
+powerMonitor.on("unlock-screen", () =>
+	sendToMainWindow("preload:power-event", { type: "unlock-screen" })
+);
 
 crashReporter.start({
 	productName: "InkspaceDesktop",

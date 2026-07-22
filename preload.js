@@ -8,6 +8,10 @@ function sendMainValueRequest(name) {
 	return ipcRenderer.sendSync("preload:get-main-value", name);
 }
 
+function sendWindowRequest(channel, payload) {
+	return ipcRenderer.sendSync(channel, payload);
+}
+
 window.__INKSPACE_PRELOAD__ = Object.freeze({
 	getDownloadsPath() {
 		return sendPathRequest("downloads");
@@ -39,5 +43,33 @@ window.__INKSPACE_PRELOAD__ = Object.freeze({
 
 	showOpenDialog(options) {
 		return ipcRenderer.invoke("preload:show-open-dialog", options || {});
+	},
+
+	editWindow(props) {
+		return sendWindowRequest("preload:update-window", props || {});
+	},
+
+	maximizeWindow() {
+		return ipcRenderer.invoke("preload:maximize-window");
+	},
+
+	reloadWindow() {
+		return ipcRenderer.invoke("preload:reload-window");
+	},
+
+	quitApp() {
+		return ipcRenderer.invoke("preload:quit-app");
+	},
+
+	blockSleep() {
+		return ipcRenderer.sendSync("preload:block-sleep");
+	},
+
+	unblockSleep(blockerID) {
+		return ipcRenderer.sendSync("preload:unblock-sleep", blockerID);
+	},
+
+	onPowerEvent(callback) {
+		ipcRenderer.on("preload:power-event", (event, message) => callback(message));
 	},
 });
