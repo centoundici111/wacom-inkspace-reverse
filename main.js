@@ -40,6 +40,24 @@ let mainWindowSize = null;
 let devReloadWatcher = null;
 let devReloadTimer = null;
 
+ipcMain.on("preload:get-app-path", (event, pathName) => {
+	event.returnValue = app.getPath(pathName);
+});
+
+ipcMain.handle("preload:show-save-dialog", async (event, options) => {
+	const window = BrowserWindow.fromWebContents(event.sender) || mainWindow;
+	const result = await electron.dialog.showSaveDialog(window, options || {});
+
+	return result.filePath;
+});
+
+ipcMain.handle("preload:show-open-dialog", async (event, options) => {
+	const window = BrowserWindow.fromWebContents(event.sender) || mainWindow;
+	const result = await electron.dialog.showOpenDialog(window, options || {});
+
+	return result.filePaths;
+});
+
 crashReporter.start({
 	productName: "InkspaceDesktop",
 	companyName: "Wacom Co LTD",
@@ -264,6 +282,7 @@ function createWindow() {
 		resizable: false,
 		maximizable: false,
 		webPreferences: {
+			preload: path.join(__dirname, "preload.js"),
 			enableRemoteModule: true,
 			nodeIntegration: true,
 			contextIsolation: false,

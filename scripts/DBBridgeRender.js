@@ -7,16 +7,26 @@ const {render : consoleBridge} = require("./ConsoleBridge");
 
 const project = require("../project.config.js");
 
+function getPreloadAPI() {
+	if (!window.__INKSPACE_PRELOAD__)
+		throw new Error("Inkspace preload API is unavailable");
+
+	return window.__INKSPACE_PRELOAD__;
+}
+
 class DBBridgeRender extends DBBridge {
 	constructor() {
-		super(remote.app.getPath("userData") + "/db");
+		const preload = getPreloadAPI();
+		const userDataPath = preload.getUserDataPath();
+
+		super(userDataPath + "/db");
 
 		if (process.platform == "win32")
 			this.root = this.root.replace(/\\/g, "/");
 
 		ipcRenderer.on("db-manager", (event, message) => this.recieve(message));
 
-		consoleBridge.init(remote.app.getPath("userData"), project.loggerType);
+		consoleBridge.init(userDataPath, project.loggerType);
 
 		this.glWorker = new ThreadBridge(remote.getGlobal("ROOT") + "/scripts/workers/GLWorker.js");
 		this.glWorker.init({root: this.root}, consoleBridge);

@@ -6,6 +6,13 @@ const project = require("../../project.config.js");
 const StrokesCodec = require("../../scripts/StrokesCodec");
 const async = require("async");
 
+function getPreloadAPI() {
+	if (!window.__INKSPACE_PRELOAD__)
+		throw new Error("Inkspace preload API is unavailable");
+
+	return window.__INKSPACE_PRELOAD__;
+}
+
 // AuthenticationManager.DEBUG
 let pcIsAwake = true;
 
@@ -105,15 +112,13 @@ let UIManager = {
 	},
 
 	showSaveDialog: function (title, fileName, callback) {
-		let win = remote.getCurrentWindow();
+		const preload = getPreloadAPI();
 		let options = {};
 
 		options.title = title ?? "";
-		options.defaultPath = remote.app.getPath("downloads") + "/" + fileName;
+		options.defaultPath = preload.getDownloadsPath() + "/" + fileName;
 
-		remote.dialog.showSaveDialog(win, options, callback).then((file) => {
-			callback(file.filePath);
-		});
+		preload.showSaveDialog(options).then(callback).catch(console.error);
 	},
 
 	showOpenDialog: function (
@@ -123,18 +128,16 @@ let UIManager = {
 		properties,
 		filters
 	) {
-		let win = remote.getCurrentWindow();
+		const preload = getPreloadAPI();
 		let options = {};
 
 		options.title = title ?? "";
-		options.defaultPath = remote.app.getPath("downloads");
+		options.defaultPath = preload.getDownloadsPath();
 		options.properties = properties;
 		options.buttonLabel = buttonLabel ?? "";
 		options.filters = filters;
 
-		remote.dialog.showOpenDialog(win, options, callback).then((result) => {
-			callback(result.filePaths);
-		});
+		preload.showOpenDialog(options).then(callback).catch(console.error);
 	},
 
 	openExternal: function (url) {
