@@ -1,4 +1,4 @@
-const {remote, ipcRenderer} = require("electron");
+const {ipcRenderer} = require("electron");
 const {Note, Layer, Entity} = require("./Note");
 const DBBridge = require("./DBBridge");
 const ThreadBridge = require("./ThreadBridge");
@@ -28,7 +28,7 @@ class DBBridgeRender extends DBBridge {
 
 		consoleBridge.init(userDataPath, project.loggerType);
 
-		this.glWorker = new ThreadBridge(remote.getGlobal("ROOT") + "/scripts/workers/GLWorker.js");
+		this.glWorker = new ThreadBridge(preload.getRoot() + "/scripts/workers/GLWorker.js");
 		this.glWorker.init({root: this.root}, consoleBridge);
 
 		// process.on("disconnect", () => this.glWorker.kill());

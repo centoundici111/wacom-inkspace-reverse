@@ -155,7 +155,7 @@ function renderApp() {
 				);
 
 			let version = parseInt(settings.version.replace(/\./g, ""));
-			let previousVersion = NativeLinker.get("previousVersion");
+			let previousVersion = NativeLinker.getPreviousVersion();
 			let whatsNewVersion = parseInt(whatsNew.version.replace(/\./g, ""));
 
 			if (previousVersion < whatsNewVersion) {

@@ -45,7 +45,7 @@ class Terms extends Component {
 	}
 
 	componentDidMount() {
-		let previousVersion = NativeLinker.get("previousVersion");
+		let previousVersion = NativeLinker.getPreviousVersion();
 
 		if (this.props.fte && previousVersion < 250)
 			DBManager.edit(DBManager.entities.SETTINGS, {version: previousVersion+""});

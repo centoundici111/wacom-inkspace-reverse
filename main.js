@@ -44,6 +44,25 @@ ipcMain.on("preload:get-app-path", (event, pathName) => {
 	event.returnValue = app.getPath(pathName);
 });
 
+ipcMain.on("preload:get-main-value", (event, name) => {
+	switch (name) {
+		case "ROOT":
+			event.returnValue = global.ROOT;
+			return;
+		case "previousVersion":
+			event.returnValue = global.previousVersion;
+			return;
+		case "updateFound":
+			event.returnValue = global.updateFound;
+			return;
+		case "updateInstalled":
+			event.returnValue = global.updateInstalled;
+			return;
+		default:
+			throw new Error("Unknown preload main value request: " + name);
+	}
+});
+
 ipcMain.handle("preload:show-save-dialog", async (event, options) => {
 	const window = BrowserWindow.fromWebContents(event.sender) || mainWindow;
 	const result = await electron.dialog.showSaveDialog(window, options || {});

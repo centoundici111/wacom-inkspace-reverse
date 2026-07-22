@@ -244,8 +244,20 @@ let NativeLinker = {
 		ipcRenderer.send(event);
 	},
 
-	get: function (remoteGlobalName) {
-		return remote.getGlobal(remoteGlobalName);
+	getRoot: function () {
+		return getPreloadAPI().getRoot();
+	},
+
+	getPreviousVersion: function () {
+		return getPreloadAPI().getPreviousVersion();
+	},
+
+	getUpdateFound: function () {
+		return getPreloadAPI().getUpdateFound();
+	},
+
+	getUpdateInstalled: function () {
+		return getPreloadAPI().getUpdateInstalled();
 	},
 };
 

@@ -15,7 +15,7 @@ import WhatsNewStep1 from './components/settings/wizards/whatsNew/step1.png';
 // import WhatsNewStep3 from './components/settings/wizards/whatsNew/step3.png';
 
 function fixPath(path) {
-	let appPath = NativeLinker.get("ROOT");
+	let appPath = NativeLinker.getRoot();
 	let srcPath = path.substring(path.lastIndexOf("/src/"));
 
 	return appPath + srcPath;

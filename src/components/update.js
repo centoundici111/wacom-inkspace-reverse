@@ -20,7 +20,7 @@ class update extends Component {
 	render() {
 		return (
 			<div className="edit flex-wrapper">
-				{(() => NativeLinker.get("updateInstalled") || this.state.restart ? this.renderInstalled() : this.renderLoader())()}
+				{(() => NativeLinker.getUpdateInstalled() || this.state.restart ? this.renderInstalled() : this.renderLoader())()}
 			</div>
 		);
 	}

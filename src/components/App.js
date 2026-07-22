@@ -68,7 +68,7 @@ class App extends Component {
 			return;
 		}
 
-		if (NativeLinker.get("updateFound")) {
+		if (NativeLinker.getUpdateFound()) {
 			global.redirect("/update");
 			return;
 		}

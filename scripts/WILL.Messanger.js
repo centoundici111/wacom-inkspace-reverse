@@ -1,7 +1,7 @@
 const { v4: uuid } = require("uuid");
 
 function getWorker() {
-	let worker = new Worker(NativeLinker.get("ROOT") + "/scripts/workers/WILLWorker.js");
+	let worker = new Worker(NativeLinker.getRoot() + "/scripts/workers/WILLWorker.js");
 
 	worker.addEventListener("message", function(e) {
 		messanger[e.data.action](e.data);
@@ -21,7 +21,7 @@ let messanger = {
 	affectedLayers: [],
 
 	init: function() {
-		worker.postMessage({action: "init", callback: "load", root: NativeLinker.get("ROOT"), debug: global.debug});
+		worker.postMessage({action: "init", callback: "load", root: NativeLinker.getRoot(), debug: global.debug});
 	},
 
 	load: function() {
