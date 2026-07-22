@@ -1,6 +1,9 @@
 const { v4: uuid } = require("uuid");
 
-const threads = typeof nativeRequire == 'undefined' ? require("threads") : nativeRequire("threads");
+const threads =
+	typeof nativeRequire == "undefined"
+		? require("threads")
+		: nativeRequire("threads");
 
 class ThreadBridge {
 	constructor(src) {

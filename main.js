@@ -27,6 +27,9 @@ const project = require("./project.config.js");
 const pkg = require("./package.json");
 const pkgVersion = pkg.version.split("-")[0];
 
+// Legacy native modules like serialport still load in the renderer path.
+app.allowRendererProcessReuse = false;
+
 global.THREAD = "MAIN";
 global.ROOT = path.resolve(__dirname);
 global.debug =
@@ -146,7 +149,6 @@ ipcMain.on("preload:open-dialog-window", (event, url) => {
 		minWidth: 800,
 		minHeight: 600,
 		webPreferences: {
-			enableRemoteModule: true,
 			nodeIntegration: true,
 			contextIsolation: false,
 			devTools: debug,
@@ -442,7 +444,6 @@ function createWindow() {
 		maximizable: false,
 		webPreferences: {
 			preload: path.join(__dirname, "preload.js"),
-			enableRemoteModule: true,
 			nodeIntegration: true,
 			contextIsolation: false,
 			devTools: debug,

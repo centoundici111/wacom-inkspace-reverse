@@ -1,4 +1,4 @@
-import { ipcRenderer, remote, shell, webFrame } from "electron";
+import { ipcRenderer, shell, webFrame } from "electron";
 import fs from "fs";
 import ua from "universal-analytics";
 
@@ -117,8 +117,8 @@ getPreloadAPI().onPowerEvent((message) => {
 // 	companyName: "Wacom Co LTD",
 // 	submitURL: project.crashReportURL,
 // 	extra: {
-// 		product: remote.app.getName(),
-// 		version: remote.app.getVersion() + ", based on Electron " + process.versions.electron
+// 		product: "InkspaceDesktop",
+// 		version: process.versions.electron
 // 	}
 // });
 
@@ -340,7 +340,10 @@ class MenuItem {
 	}
 }
 
-global.nativeRequire = remote.require;
+global.nativeRequire =
+	typeof __non_webpack_require__ == "function"
+		? __non_webpack_require__
+		: eval("require");
 
 global.UIManager = UIManager;
 global.IOManager = IOManager;
