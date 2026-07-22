@@ -13,7 +13,7 @@ The codebase is a legacy JavaScript application with a split between Electron ma
 - Transpilation: Babel `7` with React preset and many proposal plugins
 - Styling: plain CSS bundled via `mini-css-extract-plugin` and `css-loader`
 - Storage: `leveldown` + `levelup`
-- Native/device integration: `serialport`, `usb`, optional `noble-mac`, local `headless-gl`
+- Native/device integration: `serialport`, `usb`, optional `noble-mac`, native `gl`
 - Background/workers: `threads`
 
 ## Architecture Summary
@@ -72,7 +72,7 @@ The codebase is a legacy JavaScript application with a split between Electron ma
 ### Private or nonstandard dependencies
 
 - `cloud-js`: fetched from Bitbucket over SSH. Agent/setup work may fail without Bitbucket SSH access.
-- `gl`: points to `../headless-gl`, so the sibling `headless-gl` repository must exist locally.
+- `gl`: consumed from npm and may require local native rebuild/toolchain support depending on platform.
 - `noble-mac` and `xpc-connection`: optional macOS/BLE-related dependencies from GitHub.
 
 ### Webpack/browser fallbacks
@@ -92,11 +92,10 @@ The codebase is a legacy JavaScript application with a split between Electron ma
 
 1. Clone this repository.
 2. Ensure Bitbucket SSH access is configured before `npm install`, because `cloud-js` is fetched over SSH.
-3. Clone the `headless-gl` repository as a sibling directory at `../headless-gl`.
-4. Install dependencies with `npm install`.
-5. Run `./node_modules/.bin/electron-rebuild` after install and after adding native dependencies.
+3. Install dependencies with `npm install`.
+4. Run `npm run electron-rebuild` after install and after adding native dependencies when native modules need to be rebuilt.
 
-The existing `README.md` notes that `headless-gl` may require manual build adjustments, including updating its `binding.gyp` from `c++11` to `c++17` in that sibling repository.
+The existing `README.md` notes that the repo now consumes the published `gl` package from npm and may need local rebuild support for Electron/native toolchains on some environments.
 
 ## Common Commands
 
@@ -141,13 +140,13 @@ The existing `README.md` notes that `headless-gl` may require manual build adjus
 - Prefer minimal changes over broad refactors unless a refactor is necessary for correctness.
 - Be careful with native module upgrades; Electron, Node, and compiled dependency compatibility matter here.
 - Treat `project.config.js` as a high-impact file because it controls environment endpoints, locales, feature flags, and externals.
-- When dependency installation fails, check SSH access and the sibling `headless-gl` checkout before debugging application code.
+- When dependency installation fails, check Bitbucket SSH access for `cloud-js` and local native toolchain readiness for `gl` before debugging application code.
 
 ## Agent Guidance
 
 - Prefer `npm`, not `yarn` or `pnpm`; no alternate lockfile is present.
 - Expect native install/build friction around `leveldown`, `serialport`, `usb`, `gl`, and BLE dependencies.
-- If dependency installation fails, check for missing sibling repo `../headless-gl` and missing Bitbucket SSH credentials first.
+- If dependency installation fails, check for missing Bitbucket SSH credentials first, then validate the local native rebuild environment for `gl` and other native modules.
 - Keep changes compatible with the current legacy stack: Electron 12, React 17, React Router 5, Redux, Babel-transpiled JavaScript.
 - Follow formatting already configured in `.prettierrc`: tabs enabled, `tabWidth: 4`.
 - There is no obvious automated test suite configured in `package.json`; verify changes with targeted builds or app runs when possible.
