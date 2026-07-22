@@ -69,6 +69,14 @@ window.__INKSPACE_PRELOAD__ = Object.freeze({
 		sendRequest("preload:open-dialog-window", url);
 	},
 
+	popupMenu(menu) {
+		return sendWindowRequest("preload:popup-menu", menu);
+	},
+
+	setApplicationMenu(menu) {
+		return sendWindowRequest("preload:set-application-menu", menu);
+	},
+
 	blockSleep() {
 		return ipcRenderer.sendSync("preload:block-sleep");
 	},
@@ -79,5 +87,13 @@ window.__INKSPACE_PRELOAD__ = Object.freeze({
 
 	onPowerEvent(callback) {
 		ipcRenderer.on("preload:power-event", (event, message) => callback(message));
+	},
+
+	onMenuClick(callback) {
+		ipcRenderer.on("preload:menu-click", (event, message) => callback(message));
+	},
+
+	onMenuClosed(callback) {
+		ipcRenderer.on("preload:menu-closed", (event, message) => callback(message));
 	},
 });

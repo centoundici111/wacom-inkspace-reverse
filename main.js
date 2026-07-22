@@ -48,6 +48,30 @@ function sendToMainWindow(channel, message) {
 	mainWindow.webContents.send(channel, message);
 }
 
+function materializeMenuTemplate(template, sender, menuID) {
+	if (Array.isArray(template))
+		return template.map((item) =>
+			materializeMenuTemplate(item, sender, menuID)
+		);
+
+	let item = { ...template };
+	let callbackID = item.clickID;
+
+	delete item.clickID;
+
+	if (item.submenu)
+		item.submenu = materializeMenuTemplate(item.submenu, sender, menuID);
+
+	if (callbackID) {
+		item.click = () => {
+			if (!sender.isDestroyed())
+				sender.send("preload:menu-click", { menuID, callbackID });
+		};
+	}
+
+	return item;
+}
+
 ipcMain.on("preload:get-app-path", (event, pathName) => {
 	event.returnValue = app.getPath(pathName);
 });
@@ -131,6 +155,33 @@ ipcMain.on("preload:open-dialog-window", (event, url) => {
 
 	dialogWindow.setMenuBarVisibility(false);
 	dialogWindow.loadURL(url);
+	event.returnValue = true;
+});
+
+ipcMain.on("preload:popup-menu", (event, payload) => {
+	const window = BrowserWindow.fromWebContents(event.sender) || mainWindow;
+	const menu = Menu.buildFromTemplate(
+		materializeMenuTemplate(payload.items || [], event.sender, payload.id)
+	);
+
+	menu.popup({
+		window,
+		async: true,
+		callback: () => {
+			if (!event.sender.isDestroyed())
+				event.sender.send("preload:menu-closed", { menuID: payload.id });
+		},
+	});
+
+	event.returnValue = true;
+});
+
+ipcMain.on("preload:set-application-menu", (event, payload) => {
+	const menu = Menu.buildFromTemplate(
+		materializeMenuTemplate(payload.items || [], event.sender, payload.id)
+	);
+
+	Menu.setApplicationMenu(menu);
 	event.returnValue = true;
 });
 

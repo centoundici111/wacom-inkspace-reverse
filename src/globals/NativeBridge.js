@@ -13,6 +13,78 @@ function getPreloadAPI() {
 	return window.__INKSPACE_PRELOAD__;
 }
 
+let nextMenuID = 1;
+let nextMenuCallbackID = 1;
+const menuCallbacks = new Map();
+let currentApplicationMenuID = null;
+
+function cloneMenuTemplate(template) {
+	if (template instanceof MenuItem) return cloneMenuTemplate(template.origin);
+	if (Array.isArray(template)) return template.map((item) => cloneMenuTemplate(item));
+	if (!template || typeof template != "object") return template;
+
+	let clone = { ...template };
+
+	if (clone.submenu) clone.submenu = cloneMenuTemplate(clone.submenu);
+
+	return clone;
+}
+
+function serializeMenuTemplate(template, callbackStore, menuID) {
+	if (template instanceof MenuItem)
+		return serializeMenuTemplate(template.origin, callbackStore, menuID);
+	if (Array.isArray(template))
+		return template.map((item) =>
+			serializeMenuTemplate(item, callbackStore, menuID)
+		);
+	if (!template || typeof template != "object") return template;
+
+	let serialized = { ...template };
+
+	if (typeof serialized.click == "function") {
+		let callbackID = `${menuID}:${nextMenuCallbackID++}`;
+		callbackStore.set(callbackID, serialized.click);
+		serialized.clickID = callbackID;
+		delete serialized.click;
+	}
+
+	if (serialized.submenu)
+		serialized.submenu = serializeMenuTemplate(
+			serialized.submenu,
+			callbackStore,
+			menuID
+		);
+
+	return serialized;
+}
+
+function serializeMenu(menu, once) {
+	let callbacks = new Map();
+	let payload = {
+		id: menu.id,
+		items: serializeMenuTemplate(menu.items, callbacks, menu.id),
+	};
+
+	menuCallbacks.set(menu.id, { callbacks, once });
+
+	return payload;
+}
+
+getPreloadAPI().onMenuClick((message) => {
+	let menu = menuCallbacks.get(message.menuID);
+	if (!menu) return;
+
+	let callback = menu.callbacks.get(message.callbackID);
+	if (!callback) return;
+
+	callback();
+});
+
+getPreloadAPI().onMenuClosed((message) => {
+	let menu = menuCallbacks.get(message.menuID);
+	if (menu && menu.once) menuCallbacks.delete(message.menuID);
+});
+
 // AuthenticationManager.DEBUG
 let pcIsAwake = true;
 
@@ -219,19 +291,24 @@ let NativeLinker = {
 
 class Menu {
 	constructor() {
-		this.origin = new remote.Menu();
+		this.id = `menu-${nextMenuID++}`;
+		this.items = [];
 	}
 
 	append(menuItem) {
-		this.origin.append(menuItem);
+		this.items.push(menuItem);
 	}
 
 	popup() {
-		this.origin.popup(remote.getCurrentWindow(), { async: true });
+		getPreloadAPI().popupMenu(serializeMenu(this, true));
 	}
 
 	static setApplicationMenu(menu) {
-		remote.Menu.setApplicationMenu(menu.origin);
+		if (currentApplicationMenuID)
+			menuCallbacks.delete(currentApplicationMenuID);
+
+		currentApplicationMenuID = menu.id;
+		getPreloadAPI().setApplicationMenu(serializeMenu(menu, false));
 	}
 }
 
@@ -247,7 +324,21 @@ let UATracker = {
 	},
 };
 
-const MenuItem = remote.MenuItem;
+class MenuItem {
+	constructor(props) {
+		this.origin = cloneMenuTemplate(props);
+
+		Object.defineProperty(this, "label", {
+			get: () => this.origin.label,
+			set: (value) => (this.origin.label = value),
+		});
+
+		Object.defineProperty(this, "enabled", {
+			get: () => this.origin.enabled,
+			set: (value) => (this.origin.enabled = value),
+		});
+	}
+}
 
 global.nativeRequire = remote.require;
 
