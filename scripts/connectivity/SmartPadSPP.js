@@ -1,4 +1,4 @@
-const SerialPort = nativeRequire("serialport");
+const SerialPort = require("./SerialPortBridge");
 const process = require("process");
 
 const SmartPadNS = require("./SmartPadNS");

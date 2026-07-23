@@ -32,7 +32,9 @@ let DeviceManager = {
 	UPDATE_DEVICE_RETRY_TIMEOUT: 2000,
 	CHECK_CONNECTED_INTERVAL: 5000,
 	SEARCHING_TIMEOUT: 30000,
-	BLE_CONNECTED_TIMEOUT: 5 * 60 * 1000 * (debug ? 0 : 1),
+	// BLE reconnects are part of normal live/download transitions, so avoid
+	// showing an immediate disconnected state during dev-only debug runs.
+	BLE_CONNECTED_TIMEOUT: debug ? 5000 : 5 * 60 * 1000,
 	KEEP_ALIVE_TIMEOUT: 10000,
 	RECONNECT_TIMEOUT: 10000,
 	DOWNLOAD_INTERVAL: 15000,
@@ -695,6 +697,14 @@ let DeviceManager = {
 			console.info("--------- " + event.status.name + " ---------");
 
 			switch (event.status) {
+				case SmartPadNS.Status.CONNECTING:
+					if (
+						smartPad.transportProtocol ==
+							SmartPadNS.TransportProtocol.BLE
+					)
+						clearTimeout(this.bleConnectedTimeoutID);
+
+					break;
 				case SmartPadNS.Status.READY:
 					if (this.context == DeviceManager.Context.SETUP) {
 						global.smartPad = event.smartPad;
@@ -710,7 +720,7 @@ let DeviceManager = {
 					if (!this.device || this.device.type != smartPad.type)
 						//AuthenticationManager.createAsset(smartPad);
 
-						clearTimeout(this.searchingTimeoutID);
+					clearTimeout(this.searchingTimeoutID);
 					clearTimeout(this.bleConnectedTimeoutID);
 
 					this.setDeviceStatus(DeviceStatus.CONNECTED_NOT_CHARGING);
@@ -723,6 +733,7 @@ let DeviceManager = {
 					if (event.forgetDevice) {
 						this.device = null;
 
+						clearTimeout(this.searchingTimeoutID);
 						clearTimeout(this.bleConnectedTimeoutID);
 						this.setDeviceStatus(DeviceStatus.DISCONNECTED);
 					} else {
@@ -730,6 +741,8 @@ let DeviceManager = {
 							smartPad.transportProtocol ==
 							SmartPadNS.TransportProtocol.BLE
 						) {
+							clearTimeout(this.searchingTimeoutID);
+							clearTimeout(this.bleConnectedTimeoutID);
 							this.bleConnectedTimeoutID = setTimeout(() => {
 								this.setDeviceStatus(DeviceStatus.DISCONNECTED);
 							}, DeviceManager.BLE_CONNECTED_TIMEOUT);

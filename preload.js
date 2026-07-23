@@ -96,4 +96,28 @@ window.__INKSPACE_PRELOAD__ = Object.freeze({
 	onMenuClosed(callback) {
 		ipcRenderer.on("preload:menu-closed", (event, message) => callback(message));
 	},
+
+	listSerialPorts() {
+		return ipcRenderer.invoke("preload:serialport-list");
+	},
+
+	openSerialPort(payload) {
+		return ipcRenderer.invoke("preload:serialport-open", payload || {});
+	},
+
+	writeSerialPort(payload) {
+		return ipcRenderer.invoke("preload:serialport-write", payload || {});
+	},
+
+	drainSerialPort(payload) {
+		return ipcRenderer.invoke("preload:serialport-drain", payload || {});
+	},
+
+	closeSerialPort(payload) {
+		return ipcRenderer.invoke("preload:serialport-close", payload || {});
+	},
+
+	onSerialPortEvent(callback) {
+		ipcRenderer.on("preload:serialport-event", (event, message) => callback(message));
+	},
 });

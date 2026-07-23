@@ -27,7 +27,12 @@ const project = require("./project.config.js");
 const pkg = require("./package.json");
 const pkgVersion = pkg.version.split("-")[0];
 
-// Legacy native modules like serialport still load in the renderer path.
+let serialPortModule;
+let nextSerialPortID = 1;
+const serialPorts = new Map();
+const senderSerialPorts = new Map();
+
+// Legacy native modules still load in the renderer path.
 app.allowRendererProcessReuse = false;
 
 global.THREAD = "MAIN";
@@ -44,6 +49,127 @@ let mainWindowSize = null;
 let devReloadWatcher = null;
 let devReloadTimer = null;
 const rendererPowerBlockers = new Map();
+
+function getSerialPortModule() {
+	if (!serialPortModule) serialPortModule = require("serialport");
+
+	return serialPortModule;
+}
+
+function serializeError(error) {
+	if (!error) return null;
+
+	return {
+		message: error.message,
+		name: error.name,
+		stack: error.stack,
+	};
+}
+
+function deserializeSerialPortInfo(port) {
+	if (!port) return null;
+
+	return {
+		path: port.path,
+		manufacturer: port.manufacturer,
+		serialNumber: port.serialNumber,
+		pnpId: port.pnpId,
+		locationId: port.locationId,
+		productId: port.productId,
+		vendorId: port.vendorId,
+	};
+}
+
+function sendSerialPortEvent(record, payload) {
+	if (!record || record.sender.isDestroyed()) return;
+
+	record.sender.send(
+		"preload:serialport-event",
+		Object.assign({ portID: record.id }, payload)
+	);
+}
+
+function cleanupSerialPortRecord(record) {
+	if (!record) return;
+
+	serialPorts.delete(record.id);
+
+	let ownedPorts = senderSerialPorts.get(record.senderID);
+	if (ownedPorts) {
+		ownedPorts.delete(record.id);
+
+		if (!ownedPorts.size) senderSerialPorts.delete(record.senderID);
+	}
+}
+
+function trackSerialPortSender(record) {
+	let ownedPorts = senderSerialPorts.get(record.senderID);
+
+	if (!ownedPorts) {
+		ownedPorts = new Set();
+		senderSerialPorts.set(record.senderID, ownedPorts);
+	}
+
+	ownedPorts.add(record.id);
+
+	if (!record.sender.__inkspaceSerialPortCleanupAttached) {
+		record.sender.__inkspaceSerialPortCleanupAttached = true;
+		record.sender.once("destroyed", () => {
+			let portIDs = senderSerialPorts.get(record.senderID);
+			if (!portIDs) return;
+
+			Array.from(portIDs).forEach((portID) => {
+				let serialPortRecord = serialPorts.get(portID);
+				if (!serialPortRecord) return;
+
+				cleanupSerialPortRecord(serialPortRecord);
+
+				try {
+					if (serialPortRecord.port.isOpen) serialPortRecord.port.close();
+				} catch (error) {
+					console.warn("[SERIALPORT] failed to close port on sender destroy", error);
+				}
+			});
+		});
+	}
+}
+
+function bindSerialPortEvents(record) {
+	record.port.on("data", (data) => {
+		sendSerialPortEvent(record, { type: "data", data: Array.from(data) });
+	});
+
+	record.port.on("disconnect", (error) => {
+		sendSerialPortEvent(record, {
+			type: "disconnect",
+			error: serializeError(error),
+		});
+	});
+
+	record.port.on("error", (error) => {
+		sendSerialPortEvent(record, {
+			type: "error",
+			error: serializeError(error),
+		});
+	});
+
+	record.port.on("close", (error) => {
+		sendSerialPortEvent(record, {
+			type: "close",
+			error: serializeError(error),
+		});
+
+		cleanupSerialPortRecord(record);
+	});
+}
+
+function getSerialPortRecord(portID) {
+	let record = serialPorts.get(portID);
+
+	if (!record) throw new Error("Unknown serial port: " + portID);
+
+	return record;
+}
 
 function sendToMainWindow(channel, message) {
 	if (!mainWindow || mainWindow.isDestroyed()) return;
@@ -136,6 +262,73 @@ ipcMain.handle("preload:reload-window", (event) => {
 
 ipcMain.handle("preload:quit-app", () => {
 	app.quit();
+});
+
+ipcMain.handle("preload:serialport-list", async () => {
+	let SerialPort = getSerialPortModule();
+	let ports = await SerialPort.list();
+
+	return ports.map(deserializeSerialPortInfo);
+});
+
+ipcMain.handle("preload:serialport-open", (event, payload) => {
+	let SerialPort = getSerialPortModule();
+	let sender = event.sender;
+	let port = new SerialPort(payload.path, payload.options || {});
+	let record = {
+		id: `serialport-${nextSerialPortID++}`,
+		port,
+		sender,
+		senderID: sender.id,
+	};
+
+	bindSerialPortEvents(record);
+	serialPorts.set(record.id, record);
+	trackSerialPortSender(record);
+
+	return new Promise((resolve, reject) => {
+		port.open((error) => {
+			if (error) {
+				cleanupSerialPortRecord(record);
+				reject(serializeError(error));
+			} else {
+				resolve({ portID: record.id });
+			}
+		});
+	});
+});
+
+ipcMain.handle("preload:serialport-write", (event, payload) => {
+	let record = getSerialPortRecord(payload.portID);
+
+	return new Promise((resolve, reject) => {
+		record.port.write(Buffer.from(payload.data || []), (error) => {
+			if (error) reject(serializeError(error));
+			else resolve(true);
+		});
+	});
+});
+
+ipcMain.handle("preload:serialport-drain", (event, payload) => {
+	let record = getSerialPortRecord(payload.portID);
+
+	return new Promise((resolve, reject) => {
+		record.port.drain((error) => {
+			if (error) reject(serializeError(error));
+			else resolve(true);
+		});
+	});
+});
+
+ipcMain.handle("preload:serialport-close", (event, payload) => {
+	let record = getSerialPortRecord(payload.portID);
+
+	return new Promise((resolve, reject) => {
+		record.port.close((error) => {
+			if (error) reject(serializeError(error));
+			else resolve(true);
+		});
+	});
 });
 
 ipcMain.on("preload:open-dialog-window", (event, url) => {
